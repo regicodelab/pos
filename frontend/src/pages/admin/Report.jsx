@@ -5,7 +5,7 @@ const Report = () => {
   return (
     <div className='flex'>
       <SidePanel/>
-      <div>
+      <div className='w-full'>
         Report
       </div>
     </div>

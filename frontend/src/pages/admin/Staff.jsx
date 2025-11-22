@@ -1,19 +1,29 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import SidePanel from '../../components/admin/SidePanel'
 import CustomButton from '../../components/CustomButton'
-
-const users = [
-  { _id: '1', emri: 'Regi', mbiemri: 'Mele' },
-  { _id: '2', emri: 'Arenc', mbiemri: 'Hoxha' },
-  { _id: '3', emri: 'Erold', mbiemri: 'Ceka' },
-]
+import { fetchUsersFromAPI, updateUserPassword, saveUser, deleteUser } from '../../api/staff'
+import { toast } from 'react-hot-toast';
 
 const Staff = () => {
+  const [usersList, setUsersList] = useState([])
   const [selectedUser, setSelectedUser] = useState(null)
   const [selectedDelete, setSelectedDelete] = useState(null)
   const [newStaffModalOpen, setNewStaffModalOpen] = useState(false)
+  const [newStaffFistName, setNewStaffFirstName] = useState('')
+  const [newStaffLastName, setNewStaffLastName] = useState('')
+  const [newStaffEmail, setNewStaffEmail] = useState('')
+  const [newStaffRole, setNewStaffRole] = useState('waiter')
   const [newPassword, setNewPassword] = useState(0)
   const [confirmPassword, setConfirmPassword] = useState(0)
+
+  async function fetchUsers() {
+    const data = await fetchUsersFromAPI();
+    setUsersList(data);
+  }
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   function handleUserEdit(user) {
     setSelectedUser(user)
@@ -25,54 +35,65 @@ const Staff = () => {
     setConfirmPassword('')
   }
 
-  function handleSavePassword() {
+  async function handleSavePassword() {
     if (newPassword !== confirmPassword) {
-      alert("Passwords don't match!")
+      toast.error("Passwords don't match!")
       return
     }
+    
+    updateUserPassword(selectedUser._id, newPassword);
+    fetchUsers();
 
-    // Perform update logic here...
-
+    toast.success('Password updated successfully!');
     closeModal()
   }
 
-  
-  function handleUserDelete(user){
+  function handleUserDelete(user) {
     setSelectedDelete(user)
   }
 
-  function closeDeleteModal(){
+  function closeDeleteModal() {
     setSelectedDelete(null)
   }
 
-  function handleUserDeleteConfirm(user){
-    // Fshi userin
+  async function handleUserDeleteConfirm(user) {
+    await deleteUser(selectedDelete._id);
 
-    closeDeleteModal()
+    fetchUsers();
+    toast.success('User deleted successfully!');
+    closeDeleteModal();
   }
 
   function handleAddNewStaff() {
     setNewStaffModalOpen(true)
   }
 
-  function closeNewStaffModal(){
+  function closeNewStaffModal() {
     setNewStaffModalOpen(false)
   }
 
-  function handleNewStaffSave(){
-    // Ruaj userin ne db
+  async function handleNewStaffSave() {
+    await saveUser(newStaffFistName, newStaffLastName, newStaffEmail, newPassword, newStaffRole);
 
-    closeNewStaffModal()
+    closeNewStaffModal();
+    fetchUsers();
+    toast.success('New user added successfully!');
+
+    setNewPassword('');
+    setNewStaffFirstName('');
+    setNewStaffLastName('');
+    setNewStaffEmail('');
+    setNewStaffRole('waiter');
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex">
       <SidePanel />
 
-      <div className="flex flex-col w-full px-12 py-10">
+      <div className="flex flex-col w-full py-10">
         {/* Header Section */}
-        <div className="flex items-center justify-between mb-10">
-          <h1 className="text-2xl font-semibold text-gray-800 tracking-tight">
+        <div className="flex items-center justify-between mb-10 mx-12">
+          <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
             Staff Panel
           </h1>
 
@@ -84,23 +105,25 @@ const Staff = () => {
         </div>
 
         {/* Content Card */}
-        <div className="bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden">
-          <div className="grid grid-cols-4 px-6 py-3 bg-gray-100 text-gray-700 font-medium text-sm border-b">
+        <div className="bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden mx-12">
+          <div className="grid grid-cols-5 px-6 py-3 bg-gray-100 text-gray-700 font-medium text-sm border-b">
             <div>#</div>
             <div>Emri</div>
             <div>Mbiemri</div>
+            <div>Roli</div>
             <div className="text-right">Actions</div>
           </div>
 
           <div className="divide-y divide-gray-100">
-            {users.map((user, idx) => (
+            {usersList.map((user, idx) => (
               <div
                 key={idx}
-                className="grid grid-cols-4 px-6 py-4 text-sm text-gray-700 hover:bg-gray-50 transition"
+                className="grid grid-cols-5 px-6 py-4 text-sm text-gray-700 hover:bg-gray-50 transition"
               >
                 <div className="text-gray-500">{idx + 1}</div>
-                <div>{user.emri}</div>
-                <div>{user.mbiemri}</div>
+                <div>{user.first_name}</div>
+                <div>{user.last_name}</div>
+                <div className='uppercase'>{user.role}</div>
 
                 <div className="text-right">
                   <button
@@ -110,12 +133,15 @@ const Staff = () => {
                     Edit
                   </button>
 
-                  <button
-                    className="text-red-600 hover:text-red-700 hover:underline cursor-pointer ml-16"
-                    onClick={()=> handleUserDelete(user)}
-                  >
-                    Delete
-                  </button>
+                  {
+                    user.role !== 'admin' &&
+                    <button
+                      className="text-red-600 hover:text-red-700 hover:underline cursor-pointer ml-16"
+                      onClick={() => handleUserDelete(user)}
+                    >
+                      Delete
+                    </button>
+                  }
                 </div>
               </div>
             ))}
@@ -131,12 +157,8 @@ const Staff = () => {
           <div className="bg-white w-[350px] p-6 rounded-xl shadow-xl border border-gray-200 flex flex-col gap-4">
 
             <h2 className="text-lg font-semibold text-gray-800">
-              Change Password
+              Change Password: {selectedUser.first_name} {selectedUser.last_name}
             </h2>
-
-            <p className="text-sm text-gray-500">
-              For user: <span className="font-medium">{selectedUser.emri} {selectedUser.mbiemri}</span>
-            </p>
 
             <input
               type="number"
@@ -189,12 +211,21 @@ const Staff = () => {
               type="text"
               placeholder="Emri"
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
+              onChange={(e) => setNewStaffFirstName(e.target.value)}
             />
 
             <input
               type="text"
               placeholder="Mbiemri"
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
+              onChange={(e) => setNewStaffLastName(e.target.value)}
+            />
+
+            <input
+              type="email"
+              placeholder="Email"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
+              onChange={(e) => setNewStaffEmail(e.target.value)}
             />
 
             <input
@@ -204,6 +235,15 @@ const Staff = () => {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
             />
+
+            <select
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
+              onChange={(e) => setNewStaffRole(e.target.value)}
+            >
+              <option value="waiter">Waiter</option>
+              <option value="hall_leader">Hall Leader</option>
+              <option value="accountant">Accountant</option>
+            </select>
 
             <div className="flex justify-end gap-3 mt-4">
               <button
@@ -233,11 +273,11 @@ const Staff = () => {
           <div className="bg-white w-[350px] p-6 rounded-xl shadow-xl border border-gray-200 flex flex-col gap-4">
 
             <h2 className="text-lg font-semibold text-gray-800">
-              Delete user
+              Delete user: {selectedDelete.first_name} {selectedDelete.last_name}
             </h2>
 
             <p className="text-sm text-gray-500">
-              For user: <span className="font-medium">{selectedDelete.emri} {selectedDelete.mbiemri}</span>
+              Are you sure you want to delete this user? This action cannot be undone.
             </p>
 
             <div className="flex justify-end gap-3 mt-4">

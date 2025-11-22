@@ -1,19 +1,26 @@
 import React, { useState } from 'react'
 import CustomButton from '../components/CustomButton';
 import { useNavigate } from 'react-router-dom';
+import { loginUser } from '../api/auth';
+import { toast } from 'react-hot-toast';
 
 const Login = () => {
     const navigator = useNavigate();
     const [role, setRole] = useState('waiter');
-    const [username, setUsername] = useState(null);
-    const [password, setPassword] = useState(null);
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
 
-    function handleLogin(){
-        // Merr username dhe password
-        // Validoi ne back
-        // Ruaj tokenin
+    async function handleLogin(){
+        if(!username || !password) {
+            toast('Please enter both username and password');
+            return;
+        }
 
-        navigator('/dashboard')
+        const token = await loginUser(username, password);
+        localStorage.setItem('authToken', token);
+        toast.success('Login successful!');
+
+        navigator('/products');
     }
 
     return (
@@ -42,14 +49,14 @@ const Login = () => {
                                 type="text"
                                 className='w-3/4 h-[45px] bg-gray-300 rounded-2xl p-4'
                                 placeholder='Enter your username'
-                                onChange={(e) => setUsername(e.event.target)}
+                                onChange={(e) => setUsername(e.target.value)}
                             />
 
                             <input
                                 type="password"
                                 className='w-3/4 h-[45px] bg-gray-300 rounded-2xl p-4'
                                 placeholder='Enter your password'
-                                onChange={(e) => setPassword(e.event.target)}
+                                onChange={(e) => setPassword(e.target.value)}
                             />
 
                             <CustomButton
@@ -61,7 +68,7 @@ const Login = () => {
                         <div className='w-full flex justify-center items-center mt-12'>
                             <CustomButton
                                 title='Open panel'
-                                onClick={() => alert('Redirect to panel')}
+                                onClick={() => toast('Redirect to panel')}
                             />
                         </div>
                 }

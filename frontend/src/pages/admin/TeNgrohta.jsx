@@ -31,10 +31,10 @@ const TeNgrohta = () => {
     <div className='flex'>
       <SidePanel />
 
-      <div className="flex flex-col w-full px-12 py-10">
+      <div className="flex flex-col w-full py-10">
         {/* Header Section */}
-        <div className="flex items-center justify-between mb-10">
-          <h1 className="flex items-center text-2xl font-semibold text-gray-800 tracking-tight">
+        <div className="flex items-center justify-between mb-10 mx-12">
+          <h1 className="flex items-center text-2xl font-bold text-gray-800 tracking-tight">
             <img
               src="https://www.gaggia.com/app/uploads/2021/10/780x520-2.jpg"
               className='w-[100px] h-[100px] rounded-full mx-12'
@@ -51,7 +51,7 @@ const TeNgrohta = () => {
         </div>
 
         {/* Content Card */}
-        <div className="bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden">
+        <div className="bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden mx-12">
           <div className="grid grid-cols-5 px-6 py-3 bg-gray-100 text-gray-700 font-medium text-sm border-b">
             <div>#</div>
             <div>Emri</div>

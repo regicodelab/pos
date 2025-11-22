@@ -1,6 +1,7 @@
 import React from 'react'
 import CustomButton from '../CustomButton'
 import { Link, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const tabs = [
     {
@@ -24,8 +25,15 @@ const tabs = [
 const SidePanel = () => {
     const navigation = useNavigate()
 
-    function handleLogOut(){
-        navigation('/')
+    if (!localStorage.getItem('authToken')) {
+        navigation('/');
+        toast.error('Please log in to access the admin panel.');
+    }
+
+    function handleLogOut() {
+        localStorage.removeItem('authToken');
+        navigation('/');
+        toast.success('Logged out successfully.');
     }
 
     return (

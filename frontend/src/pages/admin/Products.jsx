@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 
 const categories = [
   {
-    name: 'Te ngohta',
+    name: 'Te ngrohta',
     img: 'https://www.gaggia.com/app/uploads/2021/10/780x520-2.jpg',
     path: '/tengrohta'
   },
