@@ -68,7 +68,7 @@ const Login = () => {
                         <div className='w-full flex justify-center items-center mt-12'>
                             <CustomButton
                                 title='Open panel'
-                                onClick={() => toast('Redirect to panel')}
+                                onClick={() => navigator('/waiter/tables')}
                             />
                         </div>
                 }

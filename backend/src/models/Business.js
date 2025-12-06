@@ -1,4 +1,3 @@
-const { t } = require('i18next');
 const mongoose = require('mongoose');
 
 const businessSchema = new mongoose.Schema({

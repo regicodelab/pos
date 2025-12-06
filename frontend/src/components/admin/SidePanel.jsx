@@ -13,6 +13,10 @@ const tabs = [
         path: '/staff'
     },
     {
+        name: 'Tables',
+        path: '/tablesadmin'
+    },
+    {
         name: 'Report',
         path: '/report'
     },
