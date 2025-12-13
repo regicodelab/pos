@@ -3,6 +3,7 @@ import { fetchProducts } from '../../api/products';
 import CustomButton from '../CustomButton'
 import {useNavigate} from 'react-router-dom'
 import {addNewOrder} from '../../api/orders'
+import {fetchBusinessesFromAPI} from '../../api/business';
 import toast from 'react-hot-toast';
 
 const categories = [
@@ -18,6 +19,18 @@ const WaiterCategoriesPanel = ({title, onClick, color}) => {
     const queryParams = new URLSearchParams(window.location.search);
     const tableNumber = queryParams.get('table');
     const navigator = useNavigate();
+    const [businessData, setBusinessData] = useState({
+        id: '',
+        name: '',
+        address: '',
+        nipt: '',
+        wifiPassword: '',
+        phoneNumber: '',
+        openingHours: '',
+        logoUrl: '',
+        euroExchangeRate: '',
+        moreSettings: false
+    });
 
     const [selectedCategory, setSelectedCategory] = useState('');
     const [products, setProducts] = useState([]);
@@ -75,7 +88,59 @@ const WaiterCategoriesPanel = ({title, onClick, color}) => {
 
     const handleInvoiceSave = async () => {
         const waiterPin = prompt('Vendos pinin');
-        return saveOrderInDb(waiterPin);
+        saveOrderInDb(waiterPin);
+    }
+
+    async function fetchBusinessDetails() {
+        const data = await fetchBusinessesFromAPI();
+        setBusinessData({
+            id: data._id,
+            name: data.name,
+            address: data.address,
+            nipt: data.nipt,
+            wifiPassword: data.wifi,
+            phoneNumber: data.phone,
+            openingHours: data.opening_hours,
+            logoUrl: data.logo_url,
+            euroExchangeRate: data.euro_exchange_rate,
+            moreSettings: data.more_settings
+        });
+    }
+
+    useEffect(() => {
+        fetchBusinessDetails();
+    }, []);
+
+    function handleInvoicePrint(savedOrder) {
+        toast('Printing invoice...');
+        let qrCode;
+
+        if(businessData.moreSettings){
+            qrCode = "Linku tatimeve";
+        }else{
+            qrCode = "https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg";
+        }
+        
+
+        const invoiceWindow = window.open('', 'Print Invoice', 'width=300,height=800');
+        invoiceWindow.document.write('<html><head><title>Invoice</title></head><body style="display: flex; flex-direction: column; align-items: center; justify-content:center; font-family: Arial, sans-serif;">');
+        invoiceWindow.document.write('<h1>Invoice #' + savedOrder._id.slice(20, 25) + '</h1>');
+        invoiceWindow.document.write('<p>' + businessData.address + '</p>');
+        invoiceWindow.document.write('<p>' + businessData.nipt + '</p>');
+        invoiceWindow.document.write('<p>Date: ' + new Date(savedOrder.createdAt).toLocaleString() + '</p>');
+        invoiceWindow.document.write('<table border="1" cellpadding="5" cellspacing="0"><tr><th>Item</th><th>Quantity</th><th>Price</th></tr>');
+        savedOrder.products.forEach(item => {
+            invoiceWindow.document.write('<tr><td>' + item.name + '</td><td>' + item.quantity + '</td><td>' + item.price.toFixed(2) + '</td></tr>');
+        });
+        invoiceWindow.document.write('</table>');
+        invoiceWindow.document.write('<p>Total before VAT: ' + savedOrder.total * 0.8 + '</p>');
+        invoiceWindow.document.write('<p>VAT: ' + savedOrder.total * 0.2 + '</p>');
+        invoiceWindow.document.write('<h3>Total after VAT: ' + savedOrder.total + '</h3>');
+        invoiceWindow.document.write('<img src="' + qrCode +  '" width="100px" height="100px">');
+        invoiceWindow.window.write('<p>Thank you!</p>');
+        invoiceWindow.document.write('</body></html>');
+        invoiceWindow.document.close();
+        invoiceWindow.print();
     }
 
     const saveOrderInDb = async (waiterPin) =>{
@@ -86,6 +151,11 @@ const WaiterCategoriesPanel = ({title, onClick, color}) => {
             products: invoice.products
         });
 
+        if(!savedOrder || savedOrder.error || !savedOrder._id){
+            return;
+        }
+
+        handleInvoicePrint(savedOrder);
         navigator('/waiter/tables');
     }
 
