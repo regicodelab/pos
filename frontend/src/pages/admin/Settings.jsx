@@ -20,18 +20,22 @@ const Settings = () => {
   });
 
   async function handleBusinessSave() {
-    await updateBusinessDetails(businessData.id, {
-      name: businessData.name,
-      address: businessData.address,
-      nipt: businessData.nipt,
-      wifi: businessData.wifiPassword,
-      phone: businessData.phoneNumber,
-      opening_hours: businessData.openingHours,
-      logo_url: businessData.logoUrl,
-      euro_exchange_rate: businessData.euroExchangeRate,
-      more_settings: businessData.moreSettings
-    });
-    toast.success('Business details updated successfully!');
+    try {
+      await updateBusinessDetails(businessData.id, {
+        name: businessData.name,
+        address: businessData.address,
+        nipt: businessData.nipt,
+        wifi: businessData.wifiPassword,
+        phone: businessData.phoneNumber,
+        opening_hours: businessData.openingHours,
+        logo_url: businessData.logoUrl,
+        euro_exchange_rate: businessData.euroExchangeRate,
+        more_settings: businessData.moreSettings
+      });
+      toast.success('Business details updated successfully!');
+    } catch (error) {
+      toast.error('Failed to update business details');
+    }
   }
 
   async function fetchBusinessDetails() {
@@ -61,8 +65,8 @@ const Settings = () => {
       id: '123',
       date: new Date().toLocaleDateString(),
       items: [
-        { name: 'Kafe', quantity: 2, price: 90.00 },
-        { name: 'Uje', quantity: 1, price: 80.00 }
+        { name: 'Coffee', quantity: 2, price: 90.00 },
+        { name: 'Water', quantity: 1, price: 80.00 }
       ],
       totalBeforeVat: 216.00,
       vat: 54.00,
@@ -91,128 +95,164 @@ const Settings = () => {
   }
 
   return (
-    <div className='flex'>
+    <div className='flex bg-neutral-50'>
       <SidePanel />
-      <div className='w-full py-10'>
-        <div className="flex items-center justify-between mb-10 mx-12">
-          <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
-            Settings
-          </h1>
+      <div className='flex-1 flex flex-col'>
+        {/* Header */}
+        <div className='bg-white border-b border-neutral-200 p-8'>
+          <h1 className="text-3xl font-bold text-neutral-900">Settings</h1>
+          <p className='text-neutral-600 mt-1'>Configure your business information</p>
         </div>
 
-        <div className='flex'>
+        {/* Content */}
+        <div className='flex-1 overflow-auto p-8'>
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl'>
+            {/* Business Settings Form */}
+            <div className='bg-white rounded-xl shadow-md border border-neutral-200 p-8'>
+              <h2 className='text-xl font-bold text-neutral-900 mb-6'>Business Information</h2>
+              
+              <div className='space-y-5'>
+                <div>
+                  <label className='block text-sm font-medium text-neutral-700 mb-2'>Business Name</label>
+                  <input
+                    type="text"
+                    className='w-full px-4 py-2.5 bg-white border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-active transition-colors'
+                    placeholder='Enter business name'
+                    value={businessData.name}
+                    onChange={(e) => setBusinessData({ ...businessData, name: e.target.value })}
+                  />
+                </div>
 
-          <div className='w-1/2 mx-12'>
-            <div className='flex flex-col gap-4 mt-6 w-2/3'>
-              <div className='flex flex-col gap-1'>
-                <label className='text-sm font-medium'>Business name</label>
-                <input
-                  type="text"
-                  className='border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  placeholder='Enter business name'
-                  value={businessData.name}
-                  onChange={(e) => setBusinessData({ ...businessData, name: e.target.value })}
+                <div>
+                  <label className='block text-sm font-medium text-neutral-700 mb-2'>Address</label>
+                  <input
+                    type="text"
+                    className='w-full px-4 py-2.5 bg-white border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-active transition-colors'
+                    placeholder='Enter business address'
+                    value={businessData.address}
+                    onChange={(e) => setBusinessData({ ...businessData, address: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-neutral-700 mb-2'>NIPT</label>
+                  <input
+                    type="text"
+                    className='w-full px-4 py-2.5 bg-white border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-active transition-colors uppercase'
+                    placeholder='Enter NIPT'
+                    value={businessData.nipt}
+                    onChange={(e) => setBusinessData({ ...businessData, nipt: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-neutral-700 mb-2'>WiFi Password</label>
+                  <input
+                    type="text"
+                    className='w-full px-4 py-2.5 bg-white border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-active transition-colors'
+                    placeholder='Enter WiFi password'
+                    value={businessData.wifiPassword}
+                    onChange={(e) => setBusinessData({ ...businessData, wifiPassword: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-neutral-700 mb-2'>Phone Number</label>
+                  <input
+                    type="text"
+                    className='w-full px-4 py-2.5 bg-white border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-active transition-colors'
+                    placeholder='Enter phone number'
+                    value={businessData.phoneNumber}
+                    onChange={(e) => setBusinessData({ ...businessData, phoneNumber: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-neutral-700 mb-2'>Opening Hours</label>
+                  <input
+                    type="text"
+                    className='w-full px-4 py-2.5 bg-white border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-active transition-colors'
+                    placeholder='e.g., 08:00 - 22:00'
+                    value={businessData.openingHours}
+                    onChange={(e) => setBusinessData({ ...businessData, openingHours: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-neutral-700 mb-2'>Logo URL</label>
+                  <input
+                    type="url"
+                    className='w-full px-4 py-2.5 bg-white border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-active transition-colors'
+                    placeholder='Enter logo URL'
+                    value={businessData.logoUrl}
+                    onChange={(e) => setBusinessData({ ...businessData, logoUrl: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-neutral-700 mb-2'>Euro Exchange Rate</label>
+                  <input
+                    type="number"
+                    className='w-full px-4 py-2.5 bg-white border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-active transition-colors'
+                    placeholder='e.g., 108.5'
+                    value={businessData.euroExchangeRate}
+                    onChange={(e) => setBusinessData({ ...businessData, euroExchangeRate: e.target.value })}
+                  />
+                </div>
+
+                <div className='flex items-center gap-3 pt-2'>
+                  <input
+                    id="more-settings"
+                    type="checkbox"
+                    className='w-5 h-5 rounded border-2 border-neutral-400 text-active focus:ring-active cursor-pointer accent-active'
+                    checked={businessData.moreSettings}
+                    onChange={(e) => setBusinessData({ ...businessData, moreSettings: e.target.checked })}
+                  />
+                  <label htmlFor="more-settings" className='text-sm font-medium text-neutral-700 cursor-pointer'>
+                    Enable advanced settings
+                  </label>
+                </div>
+
+                <CustomButton 
+                  title="Save Changes" 
+                  onClick={handleBusinessSave}
+                  variant="success"
+                  fullWidth
                 />
               </div>
+            </div>
 
-              <div className='flex flex-col gap-1'>
-                <label className='text-sm font-medium'>Adress</label>
-                <input
-                  type="text"
-                  className='border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  placeholder='Enter Adress'
-                  value={businessData.address}
-                  onChange={(e) => setBusinessData({ ...businessData, address: e.target.value })}
+            {/* Test Invoice Section */}
+            <div className='bg-white rounded-xl shadow-md border border-neutral-200 p-8'>
+              <h2 className='text-xl font-bold text-neutral-900 mb-6'>Invoice Testing</h2>
+              
+              <div className='flex flex-col h-full justify-around'>
+                <div className='space-y-4'>
+                  <div className='bg-info-light rounded-lg p-4 border border-info'>
+                    <p className='text-info-text text-sm'>
+                      <strong>Test Your Invoice:</strong> Click the button below to generate and print a sample invoice with your current settings.
+                    </p>
+                  </div>
+
+                  <div className='bg-neutral-100 rounded-lg p-6 space-y-3'>
+                    <p className='text-sm font-medium text-neutral-700'>Sample Invoice Preview</p>
+                    <div className='text-neutral-600 text-sm space-y-1'>
+                      <p>• 2x Coffee - 90.00 ALL</p>
+                      <p>• 1x Water - 80.00 ALL</p>
+                      <p className='font-semibold text-neutral-900 pt-2'>Total: 270.00 ALL</p>
+                    </div>
+                  </div>
+                </div>
+
+                <CustomButton 
+                  title="Print Test Invoice" 
+                  onClick={handleTestInvoicePrint}
+                  variant="success"
+                  fullWidth
                 />
               </div>
-
-              <div className='flex flex-col gap-1'>
-                <label className='text-sm font-medium'>NIPT</label>
-                <input
-                  type="text"
-                  className='border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 capitalize'
-                  placeholder='Enter NIPT'
-                  value={businessData.nipt}
-                  onChange={(e) => setBusinessData({ ...businessData, nipt: e.target.value })}
-                />
-              </div>
-
-              <div className='flex flex-col gap-1'>
-                <label className='text-sm font-medium'>WiFi Password</label>
-                <input
-                  type="text"
-                  className='border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  placeholder='Enter Current WiFi Password'
-                  value={businessData.wifiPassword}
-                  onChange={(e) => setBusinessData({ ...businessData, wifiPassword: e.target.value })}
-                />
-              </div>
-
-              <div className='flex flex-col gap-1'>
-                <label className='text-sm font-medium'>Phone Number</label>
-                <input
-                  type="text"
-                  className='border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  placeholder='Enter Business Phone Number'
-                  value={businessData.phoneNumber}
-                  onChange={(e) => setBusinessData({ ...businessData, phoneNumber: e.target.value })}
-                />
-              </div>
-
-              <div className='flex flex-col gap-1'>
-                <label className='text-sm font-medium'>Opening Hours</label>
-                <input
-                  type="text"
-                  className='border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  placeholder='Enter Opening Hours'
-                  value={businessData.openingHours}
-                  onChange={(e) => setBusinessData({ ...businessData, openingHours: e.target.value })}
-                />
-              </div>
-
-              <div className='flex flex-col gap-1'>
-                <label className='text-sm font-medium'>Logo</label>
-                <input
-                  type="url"
-                  className='border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  placeholder='Enter Logo URL'
-                  value={businessData.logoUrl}
-                  onChange={(e) => setBusinessData({ ...businessData, logoUrl: e.target.value })}
-                />
-              </div>
-
-              <div className='flex flex-col gap-1'>
-                <label className='text-sm font-medium'>Euro exchange rate</label>
-                <input
-                  type="number"
-                  className='border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  placeholder='Ex. 1 Euro = X ALL'
-                  value={businessData.euroExchangeRate}
-                  onChange={(e) => setBusinessData({ ...businessData, euroExchangeRate: e.target.value })}
-                />
-              </div>
-
-              <div className='flex gap-1'>
-                <input
-                  type="checkbox"
-                  className='border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  checked={businessData.moreSettings}
-                  onChange={(e) => setBusinessData({ ...businessData, moreSettings: e.target.checked })}
-                />
-                <label className='text-sm font-medium'>Check more settings</label>
-              </div>
-
-              <CustomButton title="Save Changes" onClick={handleBusinessSave} />
             </div>
           </div>
-
-          <div className='w-1/3'>
-            <CustomButton
-              title="Test invoice"
-              onClick={handleTestInvoicePrint}
-            />
-          </div>
-
         </div>
       </div>
     </div>

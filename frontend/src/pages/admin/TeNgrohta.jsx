@@ -3,9 +3,17 @@ import SidePanel from '../../components/admin/SidePanel'
 import CustomButton from '../../components/CustomButton'
 import { useEffect } from 'react'
 import { fetchProducts, addNewProduct } from '../../api/products';
-import CategoriesDropdown from '../../components/admin/CategoriesDropdown';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+
+const categoryData = {
+  icon: '☕',
+  name: 'Hot Drinks',
+  code: 'ngrohta'
+}
 
 const TeNgrohta = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = React.useState([]);
   const [newProductsModalOpen, setNewProductsModalOpen] = React.useState(false);
   const [newProductName, setNewProductName] = React.useState('');
@@ -14,7 +22,7 @@ const TeNgrohta = () => {
   const [newProductCurrentlyAvailable, setNewProductCurrentlyAvailable] = React.useState(0);
 
   const fetchProductsData = async () => {
-    const data = await fetchProducts('ngrohta');
+    const data = await fetchProducts(categoryData.code);
     setProducts(data);
   }
 
@@ -28,124 +36,182 @@ const TeNgrohta = () => {
 
   function closeNewProductModal() {
     setNewProductsModalOpen(false);
+    setNewProductName('');
+    setNewProductPrice(0);
+    setNewProductEntrance(0);
+    setNewProductCurrentlyAvailable(0);
   }
 
   async function handleNewProductSave() {
-    await addNewProduct({
-      name: newProductName,
-      price: newProductPrice,
-      category: 'ngrohta',
-      entrance: newProductEntrance,
-      currentlyAvailable: newProductCurrentlyAvailable
-    });
+    if (!newProductName || newProductPrice <= 0) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
 
-    closeNewProductModal();
-    fetchProductsData();
+    try {
+      await addNewProduct({
+        name: newProductName,
+        price: newProductPrice,
+        category: categoryData.code,
+        entrance: newProductEntrance,
+        currentlyAvailable: newProductCurrentlyAvailable
+      });
+      closeNewProductModal();
+      fetchProductsData();
+      toast.success('Product added successfully');
+    } catch (error) {
+      toast.error('Failed to add product');
+    }
   }
 
   return (
-    <div className='flex'>
+    <div className='flex bg-neutral-50'>
       <SidePanel />
 
-      <div className="flex flex-col w-full py-10">
+      <div className="flex-1 flex flex-col">
         {/* Header Section */}
-        <div className="flex items-center justify-between mb-10 mx-12">
-          <h1 className="flex items-center text-2xl font-bold text-gray-800 tracking-tight">
-            <img
-              src="https://www.gaggia.com/app/uploads/2021/10/780x520-2.jpg"
-              className='w-[100px] h-[100px] rounded-full mx-12'
-              alt=""
-            />
-            <CategoriesDropdown />
-          </h1>
-
-          <CustomButton
-            title="+ Add New"
-            color="green"
-            onClick={handleAddNewProduct}
-          />
-        </div>
-
-        {/* Content Card */}
-        <div className="bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden mx-12">
-          <div className="grid grid-cols-5 px-6 py-3 bg-gray-100 text-gray-700 font-medium text-sm border-b">
-            <div>#</div>
-            <div>Emri</div>
-            <div>Cmimi</div>
-            <div>Stocku</div>
-            <div>Sasia aktuale</div>
-          </div>
-
-          <div className="divide-y divide-gray-100">
-            {products.map((product, idx) => (
-              <div
-                key={idx}
-                className="grid grid-cols-5 px-6 py-4 text-sm text-gray-700 hover:bg-gray-50 transition"
-              >
-                <div className="text-gray-500">{idx + 1}</div>
-                <div>{product.name}</div>
-                <div>{product.price}</div>
-                <div>{product.entrance}</div>
-                <div>{product.currentlyAvailable}</div>
+        <div className='bg-white border-b border-neutral-200 p-8'>
+          <div className="flex items-center justify-between">
+            <div className='flex items-center gap-4'>
+              <div className='w-16 h-16 bg-neutral-100 rounded-lg flex items-center justify-center'>
+                <span className='text-3xl'>{categoryData.icon}</span>
               </div>
-            ))}
-          </div>
-        </div>
-        
-        {newProductsModalOpen && (
-          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white w-[350px] p-6 rounded-xl shadow-xl border border-gray-200 flex flex-col gap-4">
-
-            <h2 className="text-lg font-semibold text-gray-800">
-              Add new product
-            </h2>
-
-            <input
-              type="text"
-              placeholder="Name"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
-              onChange={(e) => setNewProductName(e.target.value)}
-            />
-
-            <input
-              type="number"
-              placeholder="Price"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
-              onChange={(e) => setNewProductPrice(e.target.value)}
-            />
-
-            <input
-              type="number"
-              placeholder="Entrance"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
-              onChange={(e) => setNewProductEntrance(e.target.value)}
-            />
-
-            <input
-              type="number"
-              placeholder="Currently Available"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
-              onChange={(e) => setNewProductCurrentlyAvailable(e.target.value)}
-            />
-
-            <div className="flex justify-end gap-3 mt-4">
-              <button
-                className="px-4 py-1.5 text-sm rounded-md border border-gray-300 hover:bg-gray-100 transition cursor-pointer"
-                onClick={closeNewProductModal}
-              >
-                Cancel
-              </button>
-
-              <button
-                className="px-4 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 transition cursor-pointer"
-                onClick={handleNewProductSave}
-              >
-                Save
-              </button>
+              <div>
+                <h1 className="text-3xl font-bold text-neutral-900">{categoryData.name}</h1>
+                <p className='text-neutral-600 text-sm mt-1'>Manage products in this category</p>
+              </div>
             </div>
 
+            <div className='flex gap-3'>
+              <button
+                onClick={() => navigate('/products')}
+                className='px-4 py-2 rounded-lg border-2 border-active text-active cursor-pointer hover:text-white font-semibold transition-colors'
+              >
+                ← Back
+              </button>
+              <CustomButton
+                title="+ Add Product"
+                variant="success"
+                onClick={handleAddNewProduct}
+              />
+            </div>
           </div>
         </div>
+
+        {/* Products Table */}
+        <div className="flex-1 p-8 overflow-auto">
+          <div className="bg-white rounded-xl shadow-md border border-neutral-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-neutral-100 border-b border-neutral-200">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">#</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Product Name</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Price</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Stock In</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Available</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-200">
+                  {products.map((product, idx) => (
+                    <tr key={idx} className="hover:bg-neutral-50 transition-colors">
+                      <td className="px-6 py-4 text-sm text-neutral-600">{idx + 1}</td>
+                      <td className="px-6 py-4 text-sm text-neutral-900 font-medium">{product.name}</td>
+                      <td className="px-6 py-4 text-sm text-neutral-700">{product.price.toFixed(2)} ALL</td>
+                      <td className="px-6 py-4 text-sm text-neutral-700">{product.entrance}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          product.currentlyAvailable > 0 ? 'bg-success-light text-success-text' : 'bg-error-light text-error-text'
+                        }`}>
+                          {product.currentlyAvailable}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {products.length === 0 && (
+              <div className="flex items-center justify-center h-64 text-neutral-500">
+                No products in this category yet
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Add Product Modal */}
+        {newProductsModalOpen && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl border border-neutral-200 flex flex-col gap-6">
+
+              <div>
+                <h2 className="text-2xl font-bold text-neutral-900">Add New Product</h2>
+                <p className="text-neutral-600 text-sm mt-1">{categoryData.name} category</p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Product Name</label>
+                  <input
+                    type="text"
+                    placeholder="Enter product name"
+                    className='w-full px-4 py-2.5 bg-white border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-active transition-colors'
+                    value={newProductName}
+                    onChange={(e) => setNewProductName(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Price (ALL)</label>
+                  <input
+                    type="number"
+                    placeholder="Enter price"
+                    className='w-full px-4 py-2.5 bg-white border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-active transition-colors'
+                    value={newProductPrice}
+                    onChange={(e) => setNewProductPrice(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Stock In</label>
+                  <input
+                    type="number"
+                    placeholder="Enter stock quantity"
+                    className='w-full px-4 py-2.5 bg-white border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-active transition-colors'
+                    value={newProductEntrance}
+                    onChange={(e) => setNewProductEntrance(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Currently Available</label>
+                  <input
+                    type="number"
+                    placeholder="Enter available quantity"
+                    className='w-full px-4 py-2.5 bg-white border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-active transition-colors'
+                    value={newProductCurrentlyAvailable}
+                    onChange={(e) => setNewProductCurrentlyAvailable(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-neutral-200">
+                <button
+                  className="px-4 py-2 text-sm rounded-lg border-2 border-neutral-400 text-neutral-800 hover:bg-neutral-100 transition-colors font-semibold"
+                  onClick={closeNewProductModal}
+                >
+                  Cancel
+                </button>
+
+                <CustomButton
+                  title="Add Product"
+                  variant="success"
+                  onClick={handleNewProductSave}
+                />
+              </div>
+
+            </div>
+          </div>
         )}
       </div>
     </div>

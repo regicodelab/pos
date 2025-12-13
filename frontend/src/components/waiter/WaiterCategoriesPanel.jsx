@@ -4,13 +4,13 @@ import CustomButton from '../CustomButton'
 import {useNavigate} from 'react-router-dom'
 import {addNewOrder} from '../../api/orders'
 import {fetchBusinessesFromAPI} from '../../api/business';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
 const categories = [
-    { name: 'Te ngrohta', categoryCode: 'ngrohta' },
-    { name: 'Te ftohta', categoryCode: 'ftohta' },
-    { name: 'Kuzhina', categoryCode: 'kuzhina' },
-    { name: 'Promocione', categoryCode: 'promocionale' }
+    { name: 'Hot Drinks', categoryCode: 'ngrohta', icon: '☕' },
+    { name: 'Cold Drinks', categoryCode: 'ftohta', icon: '🧊' },
+    { name: 'Kitchen', categoryCode: 'kuzhina', icon: '🍽️' },
+    { name: 'Promotions', categoryCode: 'promocionale', icon: '🎉' }
 ]
 
 let currentTime = new Date();
@@ -160,107 +160,151 @@ const WaiterCategoriesPanel = ({title, onClick, color}) => {
     }
 
     return (
-        <div className='w-full flex'>
+        <div className='w-full h-screen flex bg-neutral-50'>
 
-            <div className='w-1/2 h-screen bg-gray-700 flex justify-between items-center'>
-                <div className='flex flex-col justify-around items-center h-full w-1/3 border-r-2 border-gray-500'>
-                    {categories.map((category, idx) => (
-                        <div
-                            key={idx}
-                            className={`text-4xl hover:text-gray-300 cursor-pointer my-4 border-b-2 border-gray-500 pb-2 ${selectedCategory === category.categoryCode ? 'text-red-600' : 'text-white'}`}
-                            onClick={()=> setSelectedCategory(category.categoryCode)}
-                        >
-                            {
-                                category.categoryCode === 'promocionale' ? 
-
-                                    currentTime.getHours() >= 6 && currentTime.getHours() < 10 ? 
-                                    '' :
-                                    <div className='flex w-full justify-between'>
-                                        <img width={50} height={50} src="https://upload.wikimedia.org/wikipedia/commons/1/1d/Fig._29_-_Divieto_di_accesso_-_1959.svg" alt="" />
-                                        <img 
-                                            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGQARYK9tpBfHq10xo_CsQZ7lnVgJaOh2WkA&s" 
-                                            alt="" 
-                                            width={50}
-                                            height={50}
-                                        />
-                                    </div>
-                                : ''
-                            }
-                            {category.name}
-                        </div>
-                    ))}
+            {/* Categories & Products Section */}
+            <div className='flex-1 flex overflow-hidden'>
+                {/* Category Sidebar */}
+                <div className='w-24 bg-neutral-800 text-white flex flex-col border-r border-neutral-300'>
+                    {categories.map((category, idx) => {
+                        const isPromoDisabled = category.categoryCode === 'promocionale' && 
+                            !(currentTime.getHours() >= 6 && currentTime.getHours() < 10);
+                        
+                        return (
+                            <button
+                                key={idx}
+                                onClick={() => !isPromoDisabled && setSelectedCategory(category.categoryCode)}
+                                disabled={isPromoDisabled}
+                                className={`flex-1 flex flex-col items-center justify-center gap-2 py-4 border-b border-neutral-700 transition-all duration-200 ${
+                                    selectedCategory === category.categoryCode
+                                        ? 'bg-active text-white'
+                                        : 'hover:bg-neutral-700'
+                                } ${isPromoDisabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                                title={isPromoDisabled ? 'Available after 6 AM' : category.name}
+                            >
+                                <span className='text-3xl'>{category.icon}</span>
+                                <span className='text-xs text-center px-1'>{category.name}</span>
+                            </button>
+                        );
+                    })}
                 </div>
 
-                <div className='flex flex-col text-black justify-around items-center h-full w-2/3 bg-blue-400 px-8'>
-                    {products.map((product, idx) => (
-                        <div
-                            key={idx}
-                            className='text-4xl hover:text-gray-300 cursor-pointer my-4 border-b-2 border-gray-500 pb-2'
-                            onClick={()=> {
-                                const newInvoice = {...invoice};
-                                newInvoice.products.push({
-                                    productId: product._id,
-                                    name: product.name,
-                                    price: product.price,
-                                    quantity: 1
-                                });
-                                newInvoice.total = newInvoice.total + product.price;
-                                setInvoice(newInvoice);
-                            }}
-                        >
-                            {product.name}
+                {/* Products Grid */}
+                <div className='flex-1 overflow-y-auto p-6'>
+                    {selectedCategory ? (
+                        <div>
+                            <h2 className='text-2xl font-bold text-neutral-900 mb-6'>
+                                {categories.find(c => c.categoryCode === selectedCategory)?.name}
+                            </h2>
+                            <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4'>
+                                {products.map((product, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => {
+                                            const newInvoice = {...invoice};
+                                            newInvoice.products.push({
+                                                productId: product._id,
+                                                name: product.name,
+                                                price: product.price,
+                                                quantity: 1
+                                            });
+                                            newInvoice.total = newInvoice.total + product.price;
+                                            setInvoice(newInvoice);
+                                        }}
+                                        className='group flex flex-col items-center justify-center gap-3 p-4 bg-white rounded-xl border-2 border-neutral-200 hover:border-active hover:shadow-lg transition-all duration-200 text-center'
+                                    >
+                                        <div className='w-16 h-16 bg-neutral-100 rounded-lg flex items-center justify-center group-hover:bg-active-light transition-colors'>
+                                            <span className='text-2xl'>🍴</span>
+                                        </div>
+                                        <h3 className='text-sm font-semibold text-neutral-900 line-clamp-2'>{product.name}</h3>
+                                        <p className='text-lg font-bold text-active'>{product.price.toFixed(2)} ALL</p>
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                    ))}
+                    ) : (
+                        <div className='flex items-center justify-center h-full'>
+                            <p className='text-neutral-500 text-lg'>Select a category to get started</p>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            <div className="bg-gray-100 p-6 w-1/2">
-                <h1 className="text-3xl font-bold mb-6">Invoice: Table {invoice.table}</h1>
+            {/* Invoice Section */}
+            <div className="w-80 bg-white border-l border-neutral-300 flex flex-col overflow-hidden">
+                {/* Header */}
+                <div className='bg-gradient-to-r from-neutral-800 to-neutral-700 text-white p-6'>
+                    <h1 className="text-2xl font-bold">Invoice</h1>
+                    <p className="text-neutral-300 mt-1">Table {invoice.table}</p>
+                </div>
 
-                <div className="space-y-4">
-                    {groupedProducts.map((item, idx) => (
-                        <div key={idx} className="flex justify-between items-center bg-white p-3 rounded shadow">
-                            <div className="text-xl flex-1">{item.name}</div>
+                {/* Items List */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                    {groupedProducts.length > 0 ? (
+                        groupedProducts.map((item, idx) => (
+                            <div key={idx} className="bg-neutral-50 rounded-lg p-3 border border-neutral-200">
+                                <div className="flex justify-between items-start mb-2">
+                                    <span className="font-medium text-neutral-900 text-sm">{item.name}</span>
+                                    <span className="text-lg font-bold text-neutral-700">{item.total.toFixed(2)}</span>
+                                </div>
 
-                            <div className="flex items-center space-x-3">
-                                <button
-                                    onClick={() => handleDecrease(item.productId)}
-                                    className="text-2xl font-bold px-3 cursor-pointer"
-                                >
-                                    -
-                                </button>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => handleDecrease(item.productId)}
+                                            className="w-6 h-6 flex items-center justify-center bg-error hover:bg-error-dark text-white rounded text-sm font-bold transition-colors"
+                                        >
+                                            −
+                                        </button>
 
-                                <span className="text-xl font-semibold w-6 text-center">
-                                    {item.quantity}
-                                </span>
+                                        <span className="text-sm font-semibold w-6 text-center text-neutral-700">
+                                            {item.quantity}
+                                        </span>
 
-                                <button
-                                    onClick={() => handleIncrease(item.productId)}
-                                    className="text-2xl font-bold px-3 cursor-pointer"
-                                >
-                                    +
-                                </button>
+                                        <button
+                                            onClick={() => handleIncrease(item.productId)}
+                                            className="w-6 h-6 flex items-center justify-center bg-success hover:bg-success-dark text-white rounded text-sm font-bold transition-colors"
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                    <span className="text-xs text-neutral-600">{item.price.toFixed(2)} each</span>
+                                </div>
                             </div>
-
-                            <div className="text-xl font-semibold w-24 text-right">
-                                {item.total} ALL
-                            </div>
+                        ))
+                    ) : (
+                        <div className="flex items-center justify-center h-full text-neutral-400">
+                            <p className="text-center text-sm">No items added yet</p>
                         </div>
-                    ))}
+                    )}
                 </div>
 
-                <div className="text-right mt-6 text-2xl font-bold">
-                    Total: {invoice.total} ALL
-                </div>
+                {/* Total & Action */}
+                <div className="border-t border-neutral-300 p-4 space-y-4">
+                    <div className="bg-neutral-50 rounded-lg p-4">
+                        <div className="flex justify-between items-center">
+                            <span className="text-neutral-700 font-medium">Total:</span>
+                            <span className="text-2xl font-bold text-active">{invoice.total.toFixed(2)}</span>
+                        </div>
+                        <p className="text-xs text-neutral-500 mt-1">ALL</p>
+                    </div>
 
-                {
-                    invoice.products.length > 0 ? 
+                    {invoice.products.length > 0 && (
                         <CustomButton
-                            title='Printo faturen'
+                            title='Print Invoice'
                             onClick={handleInvoiceSave}
+                            variant='success'
+                            fullWidth
                         />
-                    : ''
-                }
+                    )}
+                    
+                    <button
+                        onClick={() => navigator('/waiter/tables')}
+                        className='w-full px-4 py-2 rounded-lg border-2 border-neutral-300 text-neutral-700 cursor-pointer font-medium transition-colors'
+                    >
+                        Back
+                    </button>
+                </div>
             </div>
         </div>
     )

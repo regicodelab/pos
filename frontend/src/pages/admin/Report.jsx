@@ -1,8 +1,10 @@
 import React from 'react'
 import SidePanel from '../../components/admin/SidePanel'
+import CustomButton from '../../components/CustomButton'
 import { fetchUsersFromAPI } from '../../api/staff';
 import { fetchReportFromAPI } from '../../api/reports';
 import { addNewOrder } from '../../api/orders';
+import { toast } from 'react-hot-toast';
 
 const Report = () => {
   const [waiters, setWaiters] = React.useState([]);
@@ -17,6 +19,7 @@ const Report = () => {
     total_products_sold: 0,
     total_amount: 0
   });
+  const [loading, setLoading] = React.useState(false);
 
   const fetchWaiters = async () => {
     const all_users = await fetchUsersFromAPI();
@@ -29,8 +32,16 @@ const Report = () => {
   }, [])
 
   const handleGenerateReport = async () => {
-    const reportData = await fetchReportFromAPI(filters);
-    setReport(reportData);
+    setLoading(true);
+    try {
+      const reportData = await fetchReportFromAPI(filters);
+      setReport(reportData);
+      toast.success('Report generated successfully');
+    } catch (error) {
+      toast.error('Failed to generate report');
+    } finally {
+      setLoading(false);
+    }
   }
 
   const handleOrderClick = async (order) => {
@@ -51,98 +62,139 @@ const Report = () => {
   }
 
   return (
-    <div className="flex">
+    <div className="flex bg-neutral-50">
       <SidePanel />
-      <div className="w-full p-6 bg-gray-50">
-        <h1 className="text-2xl font-semibold mb-6 text-gray-800">Reports</h1>
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <div className='bg-white border-b border-neutral-200 p-8'>
+          <h1 className="text-3xl font-bold text-neutral-900">Sales Report</h1>
+          <p className='text-neutral-600 mt-1'>View sales and order analytics</p>
+        </div>
 
-        <div className="bg-white p-2 rounded-lg shadow-md mb-2">
-          <h2 className="text-xl font-semibold mb-2">Filters</h2>
-          <div className="space-y-4">
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="flex-1 overflow-auto p-8 space-y-6">
+          {/* Filters Card */}
+          <div className="bg-white rounded-xl shadow-md border border-neutral-200 p-6">
+            <h2 className="text-xl font-bold text-neutral-900 mb-6">Filters</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Start Date</label>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">Waiter</label>
+                <select
+                  className="w-full px-4 py-2.5 bg-neutral-100 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-transparent"
+                  onChange={(e) => setFilters({ ...filters, waiterId: e.target.value })}
+                  value={filters.waiterId}
+                >
+                  <option value="">All Waiters</option>
+                  {waiters.map((waiter) => (
+                    <option key={waiter._id} value={waiter._id}>
+                      {waiter.first_name} {waiter.last_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">Start Date</label>
                 <input
                   type="datetime-local"
                   value={filters.startDateTime}
                   onChange={(e) => setFilters({ ...filters, startDateTime: e.target.value })}
-                  className="mt-2 block w-full h-10 border border-gray-300 rounded-md"
+                  className="w-full px-4 py-2.5 bg-neutral-100 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-transparent"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">End Date</label>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">End Date</label>
                 <input
                   type="datetime-local"
                   value={filters.endDateTime}
                   onChange={(e) => setFilters({ ...filters, endDateTime: e.target.value })}
-                  className="mt-2 block w-full h-10 border border-gray-300 rounded-md"
+                  className="w-full px-4 py-2.5 bg-neutral-100 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-transparent"
                 />
               </div>
             </div>
 
-            <div className='flex gap-4 items-center justify-between'>
-              <select
-                className="mt-2 block w-full h-10 border border-gray-300 rounded-md"
-                onChange={(e) => setFilters({ ...filters, waiterId: e.target.value })}
-              >
-                <option value="">Select a waiter</option>
-                {waiters.map((waiter) => (
-                  <option key={waiter._id} value={waiter._id}>
-                    {waiter.first_name} {waiter.last_name}
-                  </option>
-                ))}
-              </select>
-
-            <button
-              onClick={handleGenerateReport}
-              className="cursor-pointer mt-2 bg-blue-600 text-white w-40 h-10 rounded-md hover:bg-blue-700"
-            >
-              Generate Report
-            </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gray-100 px-6 pt-4 mt-2 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Report Results</h2>
-
-          <div>
-            <h3 className="text-lg font-semibold">Orders List</h3>
-            <div className="space-y-4 overflow-y-auto max-h-80">
-              {report.orders.map((order) => (
-                <div
-                 key={order._id} 
-                 className={`p-4 bg-white rounded-lg shadow-md cursor-pointer hover:bg-gray-50 ${order.total < 0 ? 'border-l-4 border-red-500' : ''}`}
-                 onClick={() => handleOrderClick(order)}
-                 >
-                  <p className="text-sm text-gray-600">Order ID: <span className="font-medium">{order._id}</span></p>
-                  <p className="text-sm text-gray-600">Total: <span className="font-medium">ALL {order.total.toFixed(2)}</span></p>
-                  <p className="text-sm text-gray-600">Created At: <span className="font-medium">{new Date(order.createdAt).toLocaleString()}</span></p>
-                  <div className="mt-2">
-                    <h4 className="text-sm font-semibold">Products:</h4>
-                    <div className="space-y-2">
-                      {order.products.map((item, index) => (
-                        <div key={index} className="text-sm text-gray-600">
-                          <p>{item.name} - Quantity: {item.quantity} - Price: ALL {item.price.toFixed(2)}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div className="mt-6 flex justify-end">
+              <CustomButton
+                title={loading ? 'Generating...' : 'Generate Report'}
+                variant="success"
+                onClick={handleGenerateReport}
+                disabled={loading}
+              />
             </div>
           </div>
 
-          <div className="mt-4">
-            <p className="text-lg font-semibold">Total Products Sold: <span className="font-normal">{report.total_products_sold}</span></p>
-            <p className="text-lg font-semibold">Total Amount: <span className="font-normal">ALL {report.total_amount.toFixed(2)}</span></p>
-          </div>
+          {/* Summary Cards */}
+          {report.orders.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white rounded-xl shadow-md border border-neutral-200 p-6">
+                <p className="text-neutral-600 text-sm font-medium">Total Orders</p>
+                <p className="text-3xl font-bold text-neutral-900 mt-2">{report.orders.length}</p>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-md border border-neutral-200 p-6">
+                <p className="text-neutral-600 text-sm font-medium">Total Products Sold</p>
+                <p className="text-3xl font-bold text-neutral-900 mt-2">{report.total_products_sold}</p>
+              </div>
+
+              <div className="bg-success-light rounded-xl shadow-md border border-success p-6">
+                <p className="text-success-text text-sm font-medium">Total Revenue</p>
+                <p className="text-3xl font-bold text-success mt-2">{report.total_amount.toFixed(2)} ALL</p>
+              </div>
+            </div>
+          )}
+
+          {/* Orders Table */}
+          {report.orders.length > 0 && (
+            <div className="bg-white rounded-xl shadow-md border border-neutral-200 overflow-hidden">
+              <div className="p-6 border-b border-neutral-200">
+                <h3 className="text-lg font-bold text-neutral-900">Recent Orders</h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-neutral-50 border-b border-neutral-200">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Date</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Table</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Waiter</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Items</th>
+                      <th className="px-6 py-3 text-right text-sm font-semibold text-neutral-700">Amount</th>
+                      <th className="px-6 py-3 text-right text-sm font-semibold text-neutral-700">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-200">
+                    {report.orders.map((order, idx) => (
+                      <tr key={idx} className="hover:bg-neutral-50 transition-colors">
+                        <td className="px-6 py-4 text-sm text-neutral-600">{new Date(order.createdAt).toLocaleString()}</td>
+                        <td className="px-6 py-4 text-sm text-neutral-900 font-medium">Table {order.table}</td>
+                        <td className="px-6 py-4 text-sm text-neutral-600">{order.waiterName || '-'}</td>
+                        <td className="px-6 py-4 text-sm text-neutral-600">{order.products.length} items</td>
+                        <td className="px-6 py-4 text-sm text-right font-semibold text-neutral-900">{order.total.toFixed(2)} ALL</td>
+                        <td className="px-6 py-4 text-right">
+                          <button
+                            onClick={() => handleOrderClick(order)}
+                            className="px-3 py-1.5 text-sm rounded-lg bg-error text-white hover:bg-error-dark transition-colors"
+                          >
+                            Reverse
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {report.orders.length === 0 && (
+            <div className="flex items-center justify-center h-64 bg-white rounded-xl border border-neutral-200">
+              <p className="text-neutral-500 text-lg">Generate a report to see results</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Report;
+export default Report

@@ -87,213 +87,251 @@ const Staff = () => {
   }
 
   return (
-    <div className="flex">
+    <div className="flex bg-neutral-50">
       <SidePanel />
 
-      <div className="flex flex-col w-full py-10">
+      <div className="flex-1 flex flex-col">
         {/* Header Section */}
-        <div className="flex items-center justify-between mb-10 mx-12">
-          <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
-            Staff Panel
-          </h1>
+        <div className='bg-white border-b border-neutral-200 p-8'>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-neutral-900">Staff Management</h1>
+              <p className='text-neutral-600 mt-1'>Manage team members and roles</p>
+            </div>
 
-          <CustomButton
-            title="+ Add Staff"
-            color="green"
-            onClick={handleAddNewStaff}
-          />
+            <CustomButton
+              title="+ Add Staff"
+              variant="success"
+              onClick={handleAddNewStaff}
+            />
+          </div>
         </div>
 
-        {/* Content Card */}
-        <div className="bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden mx-12">
-          <div className="grid grid-cols-5 px-6 py-3 bg-gray-100 text-gray-700 font-medium text-sm border-b">
-            <div>#</div>
-            <div>Emri</div>
-            <div>Mbiemri</div>
-            <div>Roli</div>
-            <div className="text-right">Actions</div>
-          </div>
+        {/* Staff Table */}
+        <div className="flex-1 p-8">
+          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-neutral-100 border-b border-neutral-200">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">#</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">First Name</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Last Name</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Email</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-700">Role</th>
+                    <th className="px-6 py-4 text-right text-sm font-semibold text-neutral-700">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-200">
+                  {usersList.map((user, idx) => (
+                    <tr key={idx} className="hover:bg-neutral-50 transition-colors">
+                      <td className="px-6 py-4 text-sm text-neutral-600">{idx + 1}</td>
+                      <td className="px-6 py-4 text-sm text-neutral-900 font-medium">{user.first_name}</td>
+                      <td className="px-6 py-4 text-sm text-neutral-900">{user.last_name}</td>
+                      <td className="px-6 py-4 text-sm text-neutral-600">{user.email || '-'}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          user.role === 'admin' ? 'bg-error-light text-error-text' : 'bg-neutral-200 text-neutral-700'
+                        }`}>
+                          {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right space-x-3">
+                        <button
+                          className="px-4 py-2 text-sm font-semibold rounded-lg bg-active text-white hover:bg-active-light shadow-md transition-all duration-200"
+                          onClick={() => handleUserEdit(user)}
+                        >
+                          ✎ Edit
+                        </button>
 
-          <div className="divide-y divide-gray-100">
-            {usersList.map((user, idx) => (
-              <div
-                key={idx}
-                className="grid grid-cols-5 px-6 py-4 text-sm text-gray-700 hover:bg-gray-50 transition"
-              >
-                <div className="text-gray-500">{idx + 1}</div>
-                <div>{user.first_name}</div>
-                <div>{user.last_name}</div>
-                <div className='uppercase'>{user.role}</div>
-
-                <div className="text-right">
-                  <button
-                    className="text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
-                    onClick={() => handleUserEdit(user)}
-                  >
-                    Edit
-                  </button>
-
-                  {
-                    user.role !== 'admin' &&
-                    <button
-                      className="text-red-600 hover:text-red-700 hover:underline cursor-pointer ml-16"
-                      onClick={() => handleUserDelete(user)}
-                    >
-                      Delete
-                    </button>
-                  }
-                </div>
-              </div>
-            ))}
+                        {user.role !== 'admin' && (
+                          <button
+                            className="px-4 py-2 text-sm font-semibold rounded-lg bg-error text-white hover:bg-error-dark shadow-md transition-all duration-200"
+                            onClick={() => handleUserDelete(user)}
+                          >
+                            🗑 Delete
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ========================= */}
-      {/*       EDIT MODAL         */}
-      {/* ========================= */}
+      {/* ========================= EDIT MODAL ========================= */}
       {selectedUser && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white w-[350px] p-6 rounded-xl shadow-xl border border-gray-200 flex flex-col gap-4">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl border border-neutral-200 flex flex-col gap-6">
 
-            <h2 className="text-lg font-semibold text-gray-800">
-              Change Password: {selectedUser.first_name} {selectedUser.last_name}
-            </h2>
+            <div>
+              <h2 className="text-2xl font-bold text-neutral-900">
+                Change Password
+              </h2>
+              <p className="text-neutral-600 text-sm mt-1">
+                {selectedUser.first_name} {selectedUser.last_name}
+              </p>
+            </div>
 
-            <input
-              type="number"
-              placeholder="New password"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">New Password</label>
+                <input
+                  type="password"
+                  placeholder="Enter new password"
+                  className='w-full px-4 py-2.5 bg-neutral-100 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-transparent transition-all'
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+              </div>
 
-            <input
-              type="number"
-              placeholder="Confirm password"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">Confirm Password</label>
+                <input
+                  type="password"
+                  placeholder="Confirm password"
+                  className='w-full px-4 py-2.5 bg-neutral-100 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-transparent transition-all'
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+              </div>
+            </div>
 
-            <div className="flex justify-end gap-3 mt-4">
+            <div className="flex justify-end gap-3 pt-4 border-t border-neutral-200">
               <button
-                className="px-4 py-1.5 text-sm rounded-md border border-gray-300 hover:bg-gray-100 transition cursor-pointer"
+                className="px-4 py-2 text-sm rounded-lg border-2 border-neutral-400 text-neutral-800 hover:bg-neutral-100 transition-colors font-semibold"
                 onClick={closeModal}
               >
                 Cancel
               </button>
 
-              <button
-                className="px-4 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 transition cursor-pointer"
+              <CustomButton
+                title="Save Password"
+                variant="success"
                 onClick={handleSavePassword}
-              >
-                Save
-              </button>
+              />
             </div>
 
           </div>
         </div>
       )}
 
-      {/* ========================= */}
-      {/*       NEW USER MODAL         */}
-      {/* ========================= */}
+      {/* ========================= NEW USER MODAL ========================= */}
       {newStaffModalOpen && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white w-[350px] p-6 rounded-xl shadow-xl border border-gray-200 flex flex-col gap-4">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl border border-neutral-200 flex flex-col gap-6">
 
-            <h2 className="text-lg font-semibold text-gray-800">
-              Add new user
-            </h2>
+            <div>
+              <h2 className="text-2xl font-bold text-neutral-900">Add New Staff</h2>
+              <p className="text-neutral-600 text-sm mt-1">Create a new team member</p>
+            </div>
 
-            <input
-              type="text"
-              placeholder="Emri"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
-              onChange={(e) => setNewStaffFirstName(e.target.value)}
-            />
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">First Name</label>
+                <input
+                  type="text"
+                  placeholder="John"
+                  className='w-full px-4 py-2.5 bg-neutral-100 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-transparent transition-all'
+                  onChange={(e) => setNewStaffFirstName(e.target.value)}
+                />
+              </div>
 
-            <input
-              type="text"
-              placeholder="Mbiemri"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
-              onChange={(e) => setNewStaffLastName(e.target.value)}
-            />
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">Last Name</label>
+                <input
+                  type="text"
+                  placeholder="Doe"
+                  className='w-full px-4 py-2.5 bg-neutral-100 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-transparent transition-all'
+                  onChange={(e) => setNewStaffLastName(e.target.value)}
+                />
+              </div>
 
-            <input
-              type="email"
-              placeholder="Email"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
-              onChange={(e) => setNewStaffEmail(e.target.value)}
-            />
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">Email</label>
+                <input
+                  type="email"
+                  placeholder="john@example.com"
+                  className='w-full px-4 py-2.5 bg-neutral-100 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-transparent transition-all'
+                  onChange={(e) => setNewStaffEmail(e.target.value)}
+                />
+              </div>
 
-            <input
-              type="number"
-              placeholder="New password"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">Password</label>
+                <input
+                  type="password"
+                  placeholder="Enter password"
+                  className='w-full px-4 py-2.5 bg-neutral-100 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-transparent transition-all'
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+              </div>
 
-            <select
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
-              onChange={(e) => setNewStaffRole(e.target.value)}
-            >
-              <option value="waiter">Waiter</option>
-              <option value="hall_leader">Hall Leader</option>
-              <option value="accountant">Accountant</option>
-            </select>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">Role</label>
+                <select
+                  className='w-full px-4 py-2.5 bg-neutral-100 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-active focus:border-transparent transition-all'
+                  onChange={(e) => setNewStaffRole(e.target.value)}
+                >
+                  <option value="waiter">Waiter</option>
+                  <option value="hall_leader">Hall Leader</option>
+                  <option value="accountant">Accountant</option>
+                </select>
+              </div>
+            </div>
 
-            <div className="flex justify-end gap-3 mt-4">
+            <div className="flex justify-end gap-3 pt-4 border-t border-neutral-200">
               <button
-                className="px-4 py-1.5 text-sm rounded-md border border-gray-300 hover:bg-gray-100 transition cursor-pointer"
+                className="px-4 py-2 text-sm rounded-lg border-2 border-neutral-400 text-neutral-800 hover:bg-neutral-100 transition-colors font-semibold"
                 onClick={closeNewStaffModal}
               >
                 Cancel
               </button>
 
-              <button
-                className="px-4 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 transition cursor-pointer"
+              <CustomButton
+                title="Add Staff"
+                variant="success"
                 onClick={handleNewStaffSave}
-              >
-                Save
-              </button>
+              />
             </div>
 
           </div>
         </div>
       )}
 
-      {/* ========================= */}
-      {/*       DELETE MODAL         */}
-      {/* ========================= */}
+      {/* ========================= DELETE MODAL ========================= */}
       {selectedDelete && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white w-[350px] p-6 rounded-xl shadow-xl border border-gray-200 flex flex-col gap-4">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl border border-neutral-200 flex flex-col gap-6">
 
-            <h2 className="text-lg font-semibold text-gray-800">
-              Delete user: {selectedDelete.first_name} {selectedDelete.last_name}
-            </h2>
+            <div>
+              <h2 className="text-2xl font-bold text-error">Delete Staff</h2>
+              <p className="text-neutral-600 text-sm mt-1">
+                {selectedDelete.first_name} {selectedDelete.last_name}
+              </p>
+            </div>
 
-            <p className="text-sm text-gray-500">
-              Are you sure you want to delete this user? This action cannot be undone.
+            <p className="text-neutral-700 text-sm">
+              Are you sure you want to delete this staff member? This action cannot be undone.
             </p>
 
-            <div className="flex justify-end gap-3 mt-4">
+            <div className="flex justify-end gap-3 pt-4 border-t border-neutral-200">
               <button
-                className="px-4 py-1.5 text-sm rounded-md border border-gray-300 hover:bg-gray-100 transition cursor-pointer"
+                className="px-4 py-2 text-sm rounded-lg border-2 border-neutral-400 text-neutral-800 hover:bg-neutral-100 transition-colors font-semibold"
                 onClick={closeDeleteModal}
               >
                 Cancel
               </button>
 
-              <button
-                className="px-4 py-1.5 text-sm rounded-md bg-red-600 text-white hover:bg-red-700 transition cursor-pointer"
+              <CustomButton
+                title="Delete"
+                variant="danger"
                 onClick={handleUserDeleteConfirm}
-              >
-                Delete
-              </button>
+              />
             </div>
 
           </div>

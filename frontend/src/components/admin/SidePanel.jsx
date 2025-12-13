@@ -1,28 +1,33 @@
 import React from 'react'
 import CustomButton from '../CustomButton'
 import { Link, useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
 const tabs = [
     {
         name: 'Products',
-        path: '/products'
+        path: '/products',
+        icon: '📦'
     },
     {
         name: 'Staff',
-        path: '/staff'
+        path: '/staff',
+        icon: '👥'
     },
     {
         name: 'Tables',
-        path: '/tablesadmin'
+        path: '/tablesadmin',
+        icon: '🪑'
     },
     {
         name: 'Report',
-        path: '/report'
+        path: '/report',
+        icon: '📊'
     },
     {
         name: 'Settings',
-        path: '/settings'
+        path: '/settings',
+        icon: '⚙️'
     },
 ]
 
@@ -41,35 +46,37 @@ const SidePanel = () => {
     }
 
     return (
-        <div className='w-1/5 h-screen bg-gray-700 flex flex-col justify-around items-center'>
-            <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7Y_3YVd32BYixRwRItDgas63OTEPtaGKbtA&s"
-                className='w-[100px] h-[100px] bg-cover bg-center'
-                alt="Bar logo"
-            />
+        <div className='w-64 h-screen bg-neutral-800 text-white flex flex-col sticky top-0 shadow-lg'>
+            {/* Logo Section */}
+            <div className='p-6 border-b border-neutral-700'>
+                <div className='w-full h-16 bg-gradient-to-r from-active to-active-light rounded-lg flex items-center justify-center'>
+                    <span className='text-2xl font-bold'>POS</span>
+                </div>
+            </div>
 
-            {
-                tabs.map((tab, idx) => {
-                    return (
-                        <Link
-                            key={idx}
-                            className='text-4xl text-white hover:text-gray-300 cursor-pointer'
-                            to={tab.path}
-                        >
-                            {tab.name}
-                        </Link>
-                    )
-                })
-            }
+            {/* Navigation */}
+            <nav className='flex-1 py-6 px-4 space-y-2'>
+                {tabs.map((tab, idx) => (
+                    <Link
+                        key={idx}
+                        to={tab.path}
+                        className='flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-neutral-700 transition-all duration-200 text-neutral-100 hover:text-white'
+                    >
+                        <span className='text-lg'>{tab.icon}</span>
+                        <span className='font-medium'>{tab.name}</span>
+                    </Link>
+                ))}
+            </nav>
 
-            <div
-                className='w-full h-[200px]'
-            ></div>
-
-            <CustomButton
-                title='Log out'
-                onClick={handleLogOut}
-            />
+            {/* Logout Button */}
+            <div className='p-4 border-t border-neutral-700'>
+                <CustomButton
+                    title='Log Out'
+                    onClick={handleLogOut}
+                    variant='danger'
+                    fullWidth
+                />
+            </div>
         </div>
     )
 }

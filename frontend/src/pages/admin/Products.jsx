@@ -5,61 +5,64 @@ import { Link } from 'react-router-dom'
 
 const categories = [
   {
-    name: 'Te ngrohta',
-    img: 'https://www.gaggia.com/app/uploads/2021/10/780x520-2.jpg',
+    name: 'Hot Drinks',
+    icon: '☕',
     path: '/tengrohta'
   },
   {
-    name: 'Te ftohta',
-    img: 'https://tiimg.tistatic.com/fp/1/005/740/coca-cola-cold-drink-717.jpg',
+    name: 'Cold Drinks',
+    icon: '🧊',
     path: '/teftohta'
   },
   {
-    name: 'Kuzhina',
-    img: 'https://blog.clover.com/wp-content/uploads/2023/01/staff-cooking-in-restaurant-commercial-kitchen.jpg',
+    name: 'Kitchen',
+    icon: '🍽️',
     path: '/kuzhina'
   },
   {
-    name: 'Promocionale',
-    img: 'https://www.rivercreeresort.com/wp-content/uploads/2024/08/Kitchen-Half-Off-PPT-Internal-july.webp',
+    name: 'Promotions',
+    icon: '🎉',
     path: '/promocionale'
   },
 ]
 
 const Products = () => {
   return (
-    <div className='flex'>
+    <div className='flex bg-neutral-50'>
       <SidePanel />
-      {/* <CategoriesSidePanel /> */}
 
-      <div className='w-full flex flex-col justify-center items-center'>
-        <div className='mb-24 w-full flex justify-center items-center text-4xl font-bold'>
-          Zgjidh nje kategori
+      <div className='flex-1 flex flex-col'>
+        {/* Header */}
+        <div className='bg-white border-b border-neutral-200 p-8'>
+          <h1 className='text-3xl font-bold text-neutral-900'>Products</h1>
+          <p className='text-neutral-600 mt-1'>Select a category to manage products</p>
         </div>
 
-        <div className='grid grid-cols-2 gap-36'>
-          {
-            categories.map((category, idx) => {
-              return (
-                <Link
-                  key={idx}
-                  className='bg-gray-700 p-8 rounded-3xl font-bold text-white hover:text-gray-300 cursor-pointer flex flex-col justify-center items-center'
-                  to={category.path}
-                >
-                  <img
-                    className='w-[100px] h-[100px] rounded-full mb-12'
-                    src={category.img}
-                    alt={category.name}
-                  />
+        {/* Categories Grid */}
+        <div className='flex-1 flex items-center justify-center p-12'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full'>
+            {categories.map((category, idx) => (
+              <Link
+                key={idx}
+                to={category.path}
+                className='group bg-white p-8 rounded-2xl shadow-md hover:shadow-xl border-2 border-neutral-200 hover:border-active transition-all duration-200 flex flex-col items-center gap-6'
+              >
+                <div className='w-24 h-24 bg-neutral-100 rounded-full flex items-center justify-center group-hover:bg-active-light group-hover:scale-110 transition-all duration-200'>
+                  <span className='text-4xl'>{category.icon}</span>
+                </div>
 
+                <h2 className='text-2xl font-bold text-neutral-900 group-hover:text-active transition-colors text-center'>
                   {category.name}
-                </Link>
-              )
-            })
-          }
+                </h2>
+
+                <p className='text-neutral-600 text-sm text-center'>
+                  Manage {category.name.toLowerCase()} and pricing
+                </p>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
-
     </div>
   )
 }
