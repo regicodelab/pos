@@ -10,6 +10,7 @@ const authRouter = require('./src/routes/auth');
 const productsRouter = require('./src/routes/products');
 const tablesRouter = require('./src/routes/tables');
 const ordersRouter = require('./src/routes/orders');
+const reportsRouter = require('./src/routes/reports');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -26,6 +27,7 @@ app.use('/api/businesses', businessesRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/tables', tablesRouter);
 app.use('/api/orders', ordersRouter);
+app.use('/api/reports', reportsRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

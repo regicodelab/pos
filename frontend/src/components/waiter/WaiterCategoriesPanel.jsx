@@ -3,6 +3,7 @@ import { fetchProducts } from '../../api/products';
 import CustomButton from '../CustomButton'
 import {useNavigate} from 'react-router-dom'
 import {addNewOrder} from '../../api/orders'
+import toast from 'react-hot-toast';
 
 const categories = [
     { name: 'Te ngrohta', categoryCode: 'ngrohta' },
@@ -73,7 +74,13 @@ const WaiterCategoriesPanel = ({title, onClick, color}) => {
     };
 
     const handleInvoiceSave = async () => {
-        await addNewOrder({
+        const waiterPin = prompt('Vendos pinin');
+        return saveOrderInDb(waiterPin);
+    }
+
+    const saveOrderInDb = async (waiterPin) =>{
+        const savedOrder = await addNewOrder({
+            waiterPin: waiterPin,
             table: invoice.table,
             total: invoice.total,
             products: invoice.products

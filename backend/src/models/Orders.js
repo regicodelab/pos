@@ -15,6 +15,16 @@ const ordersSchema = new mongoose.Schema({
         type: Array,
         required: true,
         unique: false
+    },
+    waiterId:{
+        type: String,
+        required: true,
+        unique: false
+    },
+    waiterName:{
+        type: String,
+        required: true,
+        unique: false
     }
 }, {
   timestamps: true
